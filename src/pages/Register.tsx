@@ -5,6 +5,7 @@ import CachedIcon from '@mui/icons-material/Cached';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import CustomSnackbar from '../elements/CustomSnackbar.tsx';
+import {useNavigate} from "react-router-dom";
 
 function Register() {
   const [register, setRegister] = useState<RegisterType>({
@@ -14,18 +15,19 @@ function Register() {
     password: ''
   });
 
+  const navigate = useNavigate();
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'warning' | 'info'>('success');
-
+  const [loading, setLoading] = useState<boolean>(false);
 
   function handleChange(key: string, value: string) {
     setRegister({
       ...register,
-      [key]: value
+      [key]: value.trim()
     });
   }
 
@@ -37,41 +39,73 @@ function Register() {
     setShowConfirmPassword(!showConfirmPassword);
   }
 
-  function handleSubmit() {
+  function fieldsAreValid(): boolean {
     if (register.username.length < 3) {
       setSnackbarMessage('Le nom d\'utilisateur doit contenir au moins 3 caractères');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
-      return;
+      return false;
     }
-    if (register.socialSecurityNumber.length !== 15) {
-      setSnackbarMessage('Le numéro de sécurité sociale doit contenir 15 caractères');
+    if (register.socialSecurityNumber.length !== 13) {
+      setSnackbarMessage('Le numéro de sécurité sociale doit contenir 13 caractères');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
-      return;
+      return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(register.email)) {
       setSnackbarMessage('L\'email n\'est pas valide');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
-      return;
+      return false;
     }
     if (register.password.length < 5) {
       setSnackbarMessage('Le mot de passe doit contenir au moins 8 caractères');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
-      return;
+      return false;
     }
     if (register.password !== confirmPassword) {
       setSnackbarMessage('Les mots de passe ne correspondent pas');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
-      return;
+      return false;
     }
-    setSnackbarMessage('Inscription réussie');
-    setSnackbarSeverity('success');
-    setSnackbarOpen(true);
+    return true;
+  }
+
+  async function handleRegister() {
+    if (fieldsAreValid()) {
+      setLoading(true);
+      try {
+        const response = await fetch('https://127.0.0.1:8000/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(register)
+        });
+
+        if (response.ok) {
+          setSnackbarMessage('Inscription réussie');
+          setSnackbarSeverity('success');
+          setSnackbarOpen(true);
+          navigate('/login');
+        } else {
+          const errorData = await response.json();
+          setSnackbarMessage(`Erreur: ${errorData.message}`);
+          setSnackbarSeverity('error');
+          setSnackbarOpen(true);
+        }
+      } catch (error) {
+        console.error('Failed to register:', error);
+        setSnackbarMessage('Erreur de réseau ou serveur');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      } finally {
+        setLoading(false);
+      }
+    }
   }
 
   function handleSnackbarClose() {
@@ -174,8 +208,9 @@ function Register() {
               color="primary"
               size="large"
               fullWidth
-              onClick={() => handleSubmit()}
+              onClick={() => handleRegister()}
               style={{ marginTop: '16px' }}
+              loading={loading}
           >
             Register
           </Button>

@@ -1,7 +1,7 @@
 import {Link} from 'react-router-dom'
 import {Box, Button, Container, Typography} from '@mui/material'
 import {useAuth} from "../utils/AuthContext.tsx";
-import DocList from "./DocList.tsx";
+import DocList from "./docs/DocList.tsx";
 
 function Home() {
     const { isAuthenticated } = useAuth()

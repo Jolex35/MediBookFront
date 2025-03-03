@@ -6,10 +6,15 @@ import {useAuth} from "../utils/AuthContext.tsx";
 function Navbar() {
     const { isAuthenticated, logout } = useAuth();
 
+    function handleLogout() {
+        logout();
+        window.location.reload();
+    }
+
     return (
         <Box sx={{ flexGrow: 1 }} >
             <AppBar position="fixed">
-                <Toolbar display={'flex'} justifyContent={'space-between'}>
+                <Toolbar  >
                     <Box display={'flex'} component={Link} to="/">
                         <Typography variant="h4" style={{ textDecoration: 'none', color: 'white', display: 'flex', alignItems: 'center', fontFamily: 'Roboto Condensed, sans-serif', fontWeight: 900 }}>
                             MediBook
@@ -27,7 +32,7 @@ function Navbar() {
                         </Box>
                     ) : (
                         <Box sx={{ ml: 'auto' }}>
-                            <Button color="inherit" onClick={() => logout} variant={'outlined'}>
+                            <Button color="inherit" onClick={() => handleLogout()} variant={'outlined'}>
                                 Logout
                             </Button>
                         </Box>

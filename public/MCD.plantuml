@@ -1,0 +1,56 @@
+@startuml NFE114
+
+hide class circle
+hide empty members
+hide circle
+
+skinparam roundcorner<<Association>> 20
+skinparam class {
+    BackgroundColor LightYellow
+    ArrowColor SeaGreen
+    BorderColor Black
+    FontName Arial
+    FontColor Black
+}
+
+skinparam class<<Association>> {
+    BackgroundColor LightBlue
+    ArrowColor SeaGreen
+    BorderColor Black
+    FontName Arial
+    FontColor Black
+}
+
+class User {
+    <u>**username: VARCHAR(255)**</u>
+    email: VARCHAR(255)
+    secuNumber: NUMBER(13)
+    password: VARCHAR(255)
+}
+
+class Practitioner {
+    <u>**email: VARCHAR(255)**</u>
+    name: VARCHAR(255)
+    address: VARCHAR(255)
+    speciality: VARCHAR(255)
+    description: TEXT()
+}
+
+class Appointment <<Association>> {
+    <u>**id: NUMBER()**</u>
+    time: DATE()
+    status: VARCHAR("booked", "cancelled")
+}
+
+class Slot {
+    <u>**id: NUMBER()**</u>
+    time: DATE()
+    status: VARCHAR("free", "booked")
+}
+
+
+User -- "0,N" Appointment
+Practitioner --right "0,N" Appointment
+Slot --down "0,N" Practitioner
+
+@enduml
